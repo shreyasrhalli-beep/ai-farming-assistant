@@ -480,10 +480,16 @@ for message in st.session_state.farming_chat:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Chat input box at the bottom
-user_doubt = st.chat_input("Type your farming question here (e.g., How do I treat root rot naturally?)...")
+# Inline form keeps the input box right under the "Ask AI a Farming Doubt" title
+with st.form("doubt_form", clear_on_submit=True):
+    user_doubt = st.text_input(
+        "Your Question",
+        placeholder="Type your farming question here (e.g., How do I treat root rot naturally?)...",
+        label_visibility="collapsed"
+    )
+    ask_clicked = st.form_submit_button("Ask AI")
 
-if user_doubt:
+if ask_clicked and user_doubt.strip():
     # Show user's question
     st.session_state.farming_chat.append({"role": "user", "content": user_doubt})
     with st.chat_message("user"):
