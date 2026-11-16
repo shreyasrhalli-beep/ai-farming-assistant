@@ -467,3 +467,54 @@ st.markdown(
     'AI suggestions are general guidance and should be checked with local agricultural experts.</div>',
     unsafe_allow_html=True,
 )
+st.markdown("---")
+st.subheader("💬 Ask AI a Farming Doubt")
+st.caption("Have a follow-up question about your soil, pests, or crops? Ask below.")
+
+# Save chat history so questions and answers stay on screen
+if "farming_chat" not in st.session_state:
+    st.session_state.farming_chat = []
+
+# Display previous questions and answers
+for message in st.session_state.farming_chat:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Chat input box at the bottom
+user_doubt = st.chat_input("Type your farming question here (e.g., How do I treat root rot naturally?)...")
+
+if user_doubt:
+    # Show user's question
+    st.session_state.farming_chat.append({"role": "user", "content": user_doubt})
+    with st.chat_message("user"):
+        st.markdown(user_doubt)
+
+    # Generate AI answer using the farmer's context
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            try:
+                api_key = st.secrets.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
+                client = genai.Client(api_key=api_key)
+
+                doubt_prompt = f"""
+                You are a helpful, practical agricultural advisor. Answer the farmer's follow-up doubt clearly in simple English using short bullet points.
+                
+                Farmer's Farm Context (if filled):
+                - Farming Style: {farming_style}
+                - Crop/Trees: {crop}
+                - Soil: {soil_status}
+                - Location: {location}
+                - Concerns: {extra_concerns}
+                
+                Farmer's Question: {user_doubt}
+                """
+
+                response = client.models.generate_content(
+                    model="gemini-3.5-flash-lite",
+                    contents=doubt_prompt,
+                )
+                answer = response.text
+                st.markdown(answer)
+                st.session_state.farming_chat.append({"role": "assistant", "content": answer})
+            except Exception as e:
+                st.error(f"Could not answer right now: {e}")
