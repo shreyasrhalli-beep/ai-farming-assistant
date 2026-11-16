@@ -223,7 +223,7 @@ def generate_ai_report(details):
 
     validation_prompt = build_validation_prompt(details)
     validation_response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3.8-flash",
         contents=validation_prompt,
         config=types.GenerateContentConfig(temperature=0.1),
     )
@@ -235,7 +235,7 @@ def generate_ai_report(details):
         raise RuntimeError("The information could not be verified. Please review your answers.")
 
     report_response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3.8-flash",
         contents=build_report_prompt(details),
         config=types.GenerateContentConfig(temperature=0.4),
     )
